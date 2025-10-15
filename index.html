@@ -7,44 +7,58 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 20px;
             text-align: center;
-            margin: 50px;
         }
         #total-sales {
             color: green;
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 2em;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <h1>Sales Summary 2025</h1>
-    <div id="total-sales">Total Sales: $0.00</div>
+    <div id="total-sales">$0.00</div>
     <script>
-        window.onload = function() {
-            fetch('data.csv')
-                .then(response => response.text())
-                .then(data => {
-                    const lines = data.split(/\r\n|\n/);
-                    let total = 0;
-                    const headers = lines[0].toLowerCase().split(',');
-                    const salesIndex = headers.findIndex(header => header.trim() === 'sales');
+        async function fetchData() {
+            const response = await fetch('data.csv');
+            const data = await response.text();
+            const rows = data.split('\n').slice(1); // Skip header row
+            let totalSales = 0;
 
-                    for (let i = 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (line) {
-                            const values = line.split(',');
-                            const salesValue = parseFloat(values[salesIndex]);
-                            if (!isNaN(salesValue)) {
-                                total += salesValue;
-                            }
-                        }
-                    }
-                    document.getElementById('total-sales').textContent = 'Total Sales: ' + total.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-                })
-                .catch(error => console.error('Error fetching data:', error));
-        };
+            rows.forEach(row => {
+                const columns = row.split(',');
+                const sales = parseFloat(columns[1]); // Assuming sales is in the second column
+                if (!isNaN(sales)) {
+                    totalSales += sales;
+                }
+            });
+
+            document.getElementById('total-sales').textContent = '$' + totalSales.toFixed(2);
+        }
+
+        fetchData();
     </script>
-</body>
+
+        <script>
+        // 🔄 Universal CSV handler
+        async function sumCSV() {
+            try {
+                const res = await fetch('./data.csv');
+                const text = await res.text();
+                const rows = text.trim().split(/\r?\n/).slice(1); // skip header
+                const total = rows.reduce((acc, row) => {
+                    const parts = row.split(',');
+                    const val = parseFloat(parts[parts.length - 1]) || 0;
+                    return acc + val;
+                }, 0);
+                const el = document.querySelector('#total-sales');
+                if (el) el.textContent = 'Total Sales: $' + total.toFixed(2);
+            } catch (e) { console.error('CSV parse failed', e); }
+        }
+        document.addEventListener('DOMContentLoaded', sumCSV);
+        </script>
+        </body>
 </html>
-<!-- build-id: 2025-10-15T16:15:15.884576 -->
+<!-- build-id: 2025-10-15T18:41:40.614539 -->
