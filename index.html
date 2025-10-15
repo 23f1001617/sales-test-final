@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Summary 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #total-sales {
+            color: green;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sales Summary 2025</h1>
+    <div id="total-sales">Total Sales: $0.00</div>
+    <script>
+        window.onload = function() {
+            fetch('data.csv')
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split(/\r\n|\n/);
+                    let total = 0;
+                    const headers = lines[0].toLowerCase().split(',');
+                    const salesIndex = headers.findIndex(header => header.trim() === 'sales');
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (line) {
+                            const values = line.split(',');
+                            const salesValue = parseFloat(values[salesIndex]);
+                            if (!isNaN(salesValue)) {
+                                total += salesValue;
+                            }
+                        }
+                    }
+                    document.getElementById('total-sales').textContent = 'Total Sales: ' + total.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        };
+    </script>
+</body>
+</html>
+<!-- build-id: 2025-10-15T16:15:15.884576 -->
