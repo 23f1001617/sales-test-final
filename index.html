@@ -7,39 +7,65 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            text-align: center;
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 20px;
         }
         #total-sales {
+            font-size: 24px;
             color: green;
-            font-size: 2em;
             margin-top: 20px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        .dark-mode {
+            background-color: #333;
+            color: #f9f9f9;
         }
     </style>
 </head>
 <body>
     <h1>Sales Summary 2025</h1>
-    <div id="total-sales">$0.00</div>
+    <div id="total-sales">Loading total sales...</div>
+    <button id="toggle-theme">Toggle Theme</button>
+    <div id="error-message" style="color: red;"></div>
+
     <script>
-        async function fetchData() {
-            const response = await fetch('data.csv');
-            const data = await response.text();
-            const rows = data.split('\n').slice(1); // Skip header row
-            let totalSales = 0;
+        async function fetchSalesData() {
+            try {
+                const response = await fetch('./data.csv');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.text();
+                const lines = data.split('\n').slice(1); // Skip header
+                let totalSales = 0;
 
-            rows.forEach(row => {
-                const columns = row.split(',');
-                const sales = parseFloat(columns[1]); // Assuming sales is in the second column
-                if (!isNaN(sales)) {
-                    totalSales += sales;
-                }
-            });
+                lines.forEach(line => {
+                    const columns = line.split(',');
+                    if (columns.length > 1) {
+                        const sales = parseFloat(columns[1]); // Assuming sales is in the second column
+                        if (!isNaN(sales)) {
+                            totalSales += sales;
+                        }
+                    }
+                });
 
-            document.getElementById('total-sales').textContent = '$' + totalSales.toFixed(2);
+                const formattedTotal = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalSales);
+                document.getElementById('total-sales').textContent = formattedTotal;
+            } catch (error) {
+                document.getElementById('error-message').textContent = "Failed to load data.";
+            }
         }
 
-        fetchData();
+        document.getElementById('toggle-theme').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        fetchSalesData();
     </script>
+    <!-- build-id: 2023-10-01T12:00:00Z -->
 
         <script>
         // 🔄 Universal CSV handler
@@ -61,4 +87,4 @@
         </script>
         </body>
 </html>
-<!-- build-id: 2025-10-15T18:41:40.614539 -->
+<!-- build-id: 2025-10-16T11:19:22.742651 -->
